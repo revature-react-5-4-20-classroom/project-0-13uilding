@@ -156,7 +156,7 @@ The ReimbursementType model is used to track what kind of reimbursement is being
     ```javascript
       User
     ```
-
+//////////////////////////////////////////////////////////////////////////////
 ### **Find Reimbursements By Status**  
 Reimbursements should be ordered by date
 * **URL**
