@@ -13,7 +13,7 @@ The User model keeps track of users information.
 	firstName: string, // not null
 	lastName: string, // not null
 	email: string, // not null
-	role: Role // not null
+	role: Role //? Shouldn't this be a primary key? not null 
 }
 ```
 
@@ -37,7 +37,7 @@ The Reimbursement model is used to represent a single reimbursement that an empl
   dateResolved: number, // not null
   description: string, // not null
   resolver: number, // foreign key -> User
-  status: number, // foreign ey -> ReimbursementStatus, not null
+  status: number, // foreign key -> ReimbursementStatus, not null
   type: number // foreign key -> ReimbursementType
 }
 ```
