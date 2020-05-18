@@ -1,7 +1,7 @@
 import express, { Router, Request, Response } from 'express';
 import { roleIs } from '../tools';
 import { PoolClient, QueryResult } from 'pg';
-import { getAllUsers } from '../repository/userDataAccess';
+import { getAllUsers, getUser } from '../repository/userDataAccess';
 import { User } from '../models/User';
 
 export const usersRouter : Router = express.Router();
@@ -44,12 +44,17 @@ usersRouter.patch('', (req: Request, res: Response) => {
 usersRouter.get('/:id', (req: Request, res: Response) => {
   // If role === finance-manager
   let userRole: string = 'finance-manager';
-  let queryId: number = parseInt(req.params.id);
-  let userId: number = 666;
+  let queryId: number = +req.params.id;
   let roleIsFinanceManager = roleIs('finance-manager', userRole);
-  if (roleIsFinanceManager || userId === queryId) {
+  if (roleIsFinanceManager) { // || userId === queryId
     // Get user and return it
-    res.json(`User ${queryId}`).status(200);
+    getUser(queryId)
+      .then((user: User) => {
+        res.json(user);
+      })
+      .catch((e: Error) => {
+        res.json(e.message);
+      })
   } else {
     res.json(`You do not have access to users because you are not a ${userRole}.`).status(401);
   }
