@@ -2,13 +2,15 @@
 import express from 'express';
 import bodyparser from 'body-parser';
 import dotenv from 'dotenv';
+// This must go above connection pool or we won't have our environment variables
+dotenv.config();
+
 // Routes
 import { usersRouter } from './routes/users';
 import { loginRouter } from './routes/login';
 import { reimbursementsRouter } from './routes/reimbursements';
 
-// This must go above connection pool or we won't have our environment variables
-dotenv.config();
+
 
 import { Application } from 'express';
 import { connectionPool } from './repository';
@@ -29,13 +31,11 @@ app.listen(PORT, () => {
   // Here we connect to our DB
   connectionPool.connect().then(
     (client: PoolClient) => {
-      console.log(`Connected to ${process.env.PG_DATABASE}`);
-      client.query('SELECT * FROM project_0.users;').then(
-        (result : QueryResult) => {
-          console.log(result.rows[0]);
-        }
-      )
-    }).catch((err) => {
+      console.log(`Connected to... 
+Database: ${process.env.PG_DATABASE} 
+Port: ${process.env.PG_PORT}`);
+      client && client.release();
+    }).catch((err: Error) => {
       console.error(err.message);
-    })
+    });
 })

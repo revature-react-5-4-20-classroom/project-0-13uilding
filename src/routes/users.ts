@@ -1,5 +1,8 @@
 import express, { Router, Request, Response } from 'express';
 import { roleIs } from '../tools';
+import { PoolClient, QueryResult } from 'pg';
+import { getAllUsers } from '../repository/userDataAccess';
+import { User } from '../models/User';
 
 export const usersRouter : Router = express.Router();
 
@@ -9,12 +12,18 @@ usersRouter.get('', (req: Request, res: Response) => {
   let userRole: string = 'finance-manager';
   let roleIsFinanceManager: boolean = roleIs('finance-manager', userRole);
   if (roleIsFinanceManager) {
-    // Get our users and return them in an array
-    res.json("Users Array").status(200);
+    console.log('Running get user');
+    getAllUsers()
+      .then((users: User[]) => {
+        res.json(users);
+      })
+      .catch((e: Error) => {
+        res.json(e.message);
+      })
   } else {
-    res.send(`You do not have access to users because you are not a ${userRole}.`).status(401);
+    res.json('did not gottem');
   }
-})
+});
 
 //* Implement middleware
 usersRouter.patch('', (req: Request, res: Response) => {
@@ -27,7 +36,7 @@ usersRouter.patch('', (req: Request, res: Response) => {
     res.json("User patch").status(200);
 
   } else {
-    res.send(res.send(`You do not have access to users because you are not a ${userRole}.`).status(401));
+    res.json(`You do not have access to users because you are not a ${userRole}.`).status(401);
   }
 })
 
@@ -42,6 +51,6 @@ usersRouter.get('/:id', (req: Request, res: Response) => {
     // Get user and return it
     res.json(`User ${queryId}`).status(200);
   } else {
-    res.send(`You do not have access to users because you are not a ${userRole}.`).status(401);
+    res.json(`You do not have access to users because you are not a ${userRole}.`).status(401);
   }
 })
