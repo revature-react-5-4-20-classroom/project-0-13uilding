@@ -1,7 +1,7 @@
-import Role from "./Role";
+import { Role } from "./Role";
 
 // The User model keeps track of users information.
-export default class User {
+export class User {
   userId: number; // primary key
 	username: string; // not null; unique
 	password: string; // not null
@@ -10,12 +10,12 @@ export default class User {
 	email: string; // not null
 	role: Role; // not null
   constructor(userId: number, username: string, password: string, firstName: string, lastName: string, email: string, role: Role,) {
-    userId = this.userId;
-    username = this.username;
-    password = this.password;
-    firstName = this.firstName;
-    lastName = this.lastName;
-    email = this.email;
-    role = this.role;
+    this.userId = userId;
+    this.username = username;
+    this.password = password;
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.email = email;
+    this.role = role;
   }
 }
