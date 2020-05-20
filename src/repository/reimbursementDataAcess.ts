@@ -11,7 +11,7 @@ FROM project_0.reimbursement
 WHERE reimbursementid = $1
 ORDER BY datesubmitted asc`;
 const patchReimbursementQuery = 
-`UPDATE project_0.reimbursement SET author = $2, amount = $3, dateSubmitted = $4, dateResolved = $5, description = $6, resolver = $7, status = $8, type = $9 
+`UPDATE project_0.reimbursement SET author = $2, amount = $3, datesubmitted = $4, dateresolved = $5, description = $6, resolver = $7, status = $8, type = $9 
 WHERE reimbursementid = $1`;
 const postReimbursementQuery = 
 `INSERT INTO project_0.reimbursement (author, amount, dateSubmitted, dateResolved, description, resolver, status, "type")
@@ -42,7 +42,7 @@ export async function patchReimbursement(reimbursement: Reimbursement): Promise<
       let validationArray : string[] = ['author', 'resolver', 'status', 'type'];
       // Append our patchUserQuery with all the rows that are passed in
       for (let field in result.rows[0]) {
-        console.log(`Currently on field | ${field}`)
+        // console.log(`Currently on field | ${field}`)
         if (reimbursement[field] !== undefined) {
           if (validationArray.includes(field)) {
             let columnName: string = '';
