@@ -1,9 +1,9 @@
 // The Role model is used to track what permissions a user has
 export class Role {
-  roleId: number; // primary key
+  roleid: number; // primary key
   role: string; // not null, unique
-  constructor(roleId: number, role: string) {
-    this.roleId = roleId;
+  constructor(roleid: number, role: string) {
+    this.roleid = roleid;
     this.role = role;
   }
 }

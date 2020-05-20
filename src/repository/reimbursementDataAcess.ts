@@ -84,9 +84,9 @@ export async function patchReimbursement(reimbursement: Reimbursement): Promise<
       // For some reason the spead operator isn't working here so I used destructuring
       return new Reimbursement(reimbursementid, author, amount, dateSubmitted, dateResolved, description, resolver, status, type);
     } 
-    throw new Error(`Couldn't find user.`);
+    throw new Error(`Couldn't find reimbursement.`);
   } catch(e) {
-    throw new Error(`Failed to patch user: ${e.message}`)
+    throw new Error(`Failed to patch reimbursement: ${e.message}`)
   } finally {
     client && client.release();
   }

@@ -1,29 +1,27 @@
 import express, { Request, Response, Router } from 'express';
+import { getUser, getUserByUsername } from '../repository/userDataAccess';
 
 export const loginRouter : Router = express.Router();
 
-//! Do this later
-//* Code to revamp 
-loginRouter.post('', (req: Request, res: Response) => {
+
+loginRouter.post('', async (req: Request, res: Response) => {
   let { username, password } : { username: string, password: string} = req.body;
   // I'm getting the username and password
   console.log(
 `Username: ${username}
 Password: ${password}`)
-  // Need to confirm that the username and password match what our database says
-  let usernameExists: boolean = true;
-  if (usernameExists) {
-    let passwordCorrect: boolean = true;
-    if (passwordCorrect) {
-      // 'OK'
-      res.send('User').status(200);
-      // I'm guessing we would want to reroute to a new page 
-      // 'continue' res.status(200);
-    } else {
-      res.send("Invalid Credentials").status(400);
-    }
+  if ( !username || !password ) {
+    res.status(400).json('Please include username and password fields')
   } else {
-    //? Not found 404
-    res.send("Invalid Credentials").status(400);
+    try {
+      const user = await getUserByUsername(username, password)
+      if (req.session) {
+        req.session.user = user;
+      }
+      //! This seems dumb. This would include the password... Stretch goals later
+      res.json(user);
+    } catch (e) {
+      res.status(401).json(`UNAUTHORIZED`)
+    }
   }
 })

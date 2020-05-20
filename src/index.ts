@@ -15,12 +15,14 @@ import { reimbursementsRouter } from './routes/reimbursements';
 import { Application } from 'express';
 import { connectionPool } from './repository';
 import { PoolClient, QueryResult } from 'pg';
+import { sessionMiddleware } from './middleware/sessionMiddleware';
 
 
 const PORT: number = 3000;
 const app: Application = express();
 
 app.use(bodyparser.json());
+app.use(sessionMiddleware);
 
 app.use('/login', loginRouter);
 app.use('/users', usersRouter);

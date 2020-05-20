@@ -8,8 +8,34 @@ const findAllUsersQuery =
 FROM project_0.users INNER JOIN project_0.roles ON project_0.users.role = roleid`;
 const findUserQuery = `${findAllUsersQuery} WHERE userid = $1`;
 const findRoleQuery = `SELECT * FROM project_0.roles WHERE role = $1`;
+const findRoleByIdQuery = `SELECT * FROM project_0.roles WHERE roleid = $1`;
 const patchUserQuery = `UPDATE project_0.users SET username = $2, password = $3, firstname = $4, lastname = $5, email = $6, role = $7 WHERE userid = $1`;
+const findUserByUsernameQuery = `SELECT * FROM project_0.users WHERE username = $1 AND password = $2`;
 
+
+export async function getUserByUsername(username: string, password: string): Promise<User> {
+  let client : PoolClient;
+  client = await connectionPool.connect();
+  try {
+    let result : QueryResult;
+    result = await client.query(findUserByUsernameQuery, [username, password]);
+    const usernameMatchingPassword = result.rows.map((user) => {
+      return new User(user.userid, user.username, user.password, user.firstname, user.lastname, user.email, new Role(user.roleid, user.role))
+    })
+    if (usernameMatchingPassword.length > 0) {
+      let roleResults = await client.query(findRoleByIdQuery, [result.rows[0].role]);
+      usernameMatchingPassword[0].role.role = roleResults.rows[0].role;
+      usernameMatchingPassword[0].role.roleid = roleResults.rows[0].roleid;
+      return usernameMatchingPassword[0];
+    } else {
+      throw new Error(`Username and Password are not matched to a valid user`)
+    }
+  } catch (e) {
+    throw new Error(`Failed to validate User with DB: ${e.message}`)
+  } finally {
+    client && client.release();
+  }
+}
 
 export async function getAllUsers(): Promise<User[]> {
   let client : PoolClient;
@@ -59,7 +85,7 @@ export async function patchUser(user: User): Promise<User> {
         let roleResults = await client.query(findRoleQuery, [user.role.role]);
         if (roleResults.rows[0].length === 0) {
           throw new Error(`Role: "${user.role.role}" - Is not in our database.`);
-        } else if (user.role.roleId != roleResults.rows[0].roleid) {
+        } else if (user.role.roleid != roleResults.rows[0].roleid) {
           throw new Error(`Role "${user.role.role}" exists, but it's roleid is ${roleResults.rows[0].roleid}\nProvide the proper role title and id.`)
         }
       // If the role wasn't provided then we add the role from the database to our user so we don't break line 81
@@ -78,7 +104,7 @@ export async function patchUser(user: User): Promise<User> {
       // Use these when we return our new user
       let previousRoleId : number = updateArray.pop();
       let role: Role = updateArray.pop();
-      updateArray.push(user.role.roleId);
+      updateArray.push(user.role.roleid);
 
       let patchedResult : QueryResult;
       patchedResult = await client.query(patchUserQuery, updateArray);

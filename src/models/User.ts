@@ -6,15 +6,15 @@ interface IRawParams {
 // The User model keeps track of users information.
 export class User implements IRawParams{
   [k: string]: any;
-  userId: number; // primary key
+  userid: number; // primary key
 	username: string; // not null; unique
 	password: string; // not null
 	firstname: string; // not null
 	lastname: string; // not null
 	email: string; // not null
 	role: Role; // not null Should be Role
-  constructor(userId: number, username: string, password: string, firstname: string, lastname: string, email: string, role: Role) {
-    this.userId = userId;
+  constructor(userid: number, username: string, password: string, firstname: string, lastname: string, email: string, role: Role) {
+    this.userid = userid;
     this.username = username;
     this.password = password;
     this.firstname = firstname;
