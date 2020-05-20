@@ -1,5 +1,6 @@
 import express, { Router, Request, Response } from 'express';
 import { roleIs } from '../tools';
+import { getReimbursementsByStatus } from '../repository/reimbursementDataAcess';
 
 export const reimbursementsRouter : Router = express.Router();
 
@@ -20,6 +21,7 @@ reimbursementsRouter.patch('', (req: Request, res: Response) => {
   let roleIsFinanceManager: boolean = roleIs('finance-manager', userRole);
   if (roleIsFinanceManager) {
     // Get our users and return them in an array
+
     res.json("Reimbursement patch").status(200);
   } else {
     res.send(`You do not have access to users because you are not a ${userRole}.`).status(401);
@@ -37,7 +39,9 @@ reimbursementsRouter.get('/status/:statusId', (req: Request, res: Response) => {
   let roleIsFinanceManager: boolean = roleIs('finance-manager', userRole);
   if (roleIsFinanceManager) {
     // Get our users and return them in an array
-    res.json("reimbursement status id").status(200);
+    getReimbursementsByStatus(statusId)
+      .then((reimbursements: Array<Object>) => res.json(reimbursements))
+      .catch((e: Error) => res.json(e.message))
   } else {
     res.send(`You do not have access to users because you are not a ${userRole}.`).status(401);
   }
