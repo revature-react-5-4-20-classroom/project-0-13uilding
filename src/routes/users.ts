@@ -31,8 +31,10 @@ usersRouter.patch('', (req: Request, res: Response) => {
     // Anyfield left undefined will not be updated
     let {userId, username, password, firstName, lastName, email, role} = req.body;
     let user: User = new User(userId, username, password, firstName, lastName, email, role);
-    patchUser(userId, user)
-      .then((user: User) => res.json(user))
+    patchUser(user)
+      .then((user: User) => {
+        res.json(user)
+      })
       .catch((e: Error) => res.json(e.message))
   } else {
     res.json(`You do not have access to users because you are not a ${userRole}.`).status(401);

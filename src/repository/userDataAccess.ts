@@ -7,7 +7,8 @@ const findAllUsersQuery =
 `SELECT userid, username, password, firstname, lastname, email, project_0.roles.role, roleid
 FROM project_0.users INNER JOIN project_0.roles ON project_0.users.role = roleid`;
 const findUserQuery = `${findAllUsersQuery} WHERE userid = $1`;
-const findRoleQuery = `SELECT roleId FROM project_0.roles WHERE role = $1`;
+const findRoleQuery = `SELECT * FROM project_0.roles WHERE role = $1`;
+const patchUserQuery = `UPDATE project_0.users SET username = $2, password = $3, firstname = $4, lastname = $5, email = $6, role = $7 WHERE userid = $1`;
 
 
 export async function getAllUsers(): Promise<User[]> {
@@ -17,7 +18,7 @@ export async function getAllUsers(): Promise<User[]> {
     let result : QueryResult;
     result = await client.query(findAllUsersQuery);
     return result.rows.map((user) => {
-      return new User(user.id, user.username, user.password, user.firstname, user.lastname, user.email, new Role(result.rows[0].roleid, user.role))
+      return new User(user.userid, user.username, user.password, user.firstname, user.lastname, user.email, new Role(user.roleid, user.role))
     })
   } catch(e) {
     throw new Error(`Failed to query for all users: ${e.message}`);
@@ -33,8 +34,8 @@ export async function getUser(userId: number): Promise<User> {
     let result : QueryResult;
     result = await client.query(findUserQuery, [userId]);
     if (result.rows.length === 1) {
-      let {id, username, password, firstname, lastname, email, role} = result.rows[0];
-      return new User(id, username, password, firstname, lastname, email, new Role(result.rows[0].roleid, role))
+      let {userid, username, password, firstname, lastname, email, role} = result.rows[0];
+      return new User(userid, username, password, firstname, lastname, email, new Role(result.rows[0].roleid, role))
     } else {
       throw new Error(`Couldn't find userId: ${userId} in the database.`)
     }
@@ -45,24 +46,23 @@ export async function getUser(userId: number): Promise<User> {
   }
 }
 
-export async function patchUser(userId: number, user: User): Promise<User> {
+export async function patchUser(user: User): Promise<User> {
   let client : PoolClient;
   client = await connectionPool.connect();
   try {
     let result : QueryResult;
-    result = await client.query(findUserQuery, [userId]);
+    result = await client.query(findUserQuery, [user.userId]);
     // console.log(result);
     if (result.rows.length === 1) {
       // Confirm that the role we are trying to change to exists
       if (user.role !== undefined) {
         let roleResults = await client.query(findRoleQuery, [user.role.role]);
-        if (roleResults.rows[0] === undefined) {
+        if (roleResults.rows[0].length === 0) {
           throw new Error(`Role: "${user.role.role}" - Is not in our database.`);
+        } else if (user.role.roleId != roleResults.rows[0].roleid) {
+          throw new Error(`Role "${user.role.role}" exists, but it's roleid is ${roleResults.rows[0].roleid}\nProvide the proper role title and id.`)
         }
       }
-      // // Change all the fields if they are provided
-      // // This is not updating user outside. How to resolve?
-      let patchUserQuery = `UPDATE project_0.users SET username = $2, password = $3, firstname = $4, lastname = $5, email = $6, role = $7 WHERE userid = $1`;
       let updateArray : any[] = [];
       // Append our patchUserQuery with all the rows that are passed in
       for (let field in result.rows[0]) {
@@ -73,16 +73,15 @@ export async function patchUser(userId: number, user: User): Promise<User> {
         }
       }
       // Use these when we return our new user
-      let roleId = updateArray.pop();
-      let roleString = updateArray.pop();
-      updateArray.push(roleId);
+      let previousRoleId : number = updateArray.pop();
+      let role: Role = updateArray.pop();
+      updateArray.push(user.role.roleId);
 
       let patchedResult : QueryResult;
       patchedResult = await client.query(patchUserQuery, updateArray);
       let [userId, userName, password, firstName, lastName, email] = updateArray;
       // For some reason the spead operator isn't working here so I used destructuring
-      console.log(patchedResult);
-      return new User(userId, userName, password, firstName, lastName, email, new Role(roleId, roleString));
+      return new User(userId, userName, password, firstName, lastName, email, role);
     } 
     throw new Error(`Couldn't find user.`);
   } catch(e) {
