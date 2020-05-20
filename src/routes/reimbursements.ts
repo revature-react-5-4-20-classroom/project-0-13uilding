@@ -1,6 +1,6 @@
 import express, { Router, Request, Response } from 'express';
 import { roleIs } from '../tools';
-import { getReimbursementsByStatus, getReimbursementsByUser, postReimbursement } from '../repository/reimbursementDataAcess';
+import { getReimbursementsByStatus, getReimbursementsByUser, postReimbursement, patchReimbursement } from '../repository/reimbursementDataAcess';
 import { Reimbursement } from '../models/Reimbursement';
 
 export const reimbursementsRouter : Router = express.Router();
@@ -29,8 +29,14 @@ reimbursementsRouter.patch('', (req: Request, res: Response) => {
   let roleIsFinanceManager: boolean = roleIs('finance-manager', userRole);
   if (roleIsFinanceManager) {
     // Get our users and return them in an array
-
-    res.json("Reimbursement patch").status(200);
+    let { reimbursementid, author, amount, dateSubmitted, dateResolved, description, resolver, status, type } = req.body;
+    // Some basic validation
+    if (author <= 0 || amount <= 0 || resolver <= 0 || status <= 0 || type <= 0) {
+      res.send('Cannot have a number less than or equal to 0 as a field of the created reimbursement').status(400);
+    }
+    patchReimbursement(new Reimbursement( reimbursementid, author, amount, dateSubmitted, dateResolved, description, resolver, status, type ))
+      .then((reimbursement: Reimbursement) => res.json(reimbursement).status(200))
+      .catch((e: Error) => res.json(e.message))
   } else {
     res.send(`You do not have access to users because you are not a ${userRole}.`).status(401);
   }

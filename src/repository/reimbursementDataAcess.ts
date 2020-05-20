@@ -5,26 +5,91 @@ import { Role } from '../models/Role';
 import { ReimbursementStatus } from '../models/ReimbursementStatus';
 import { Reimbursement } from '../models/Reimbursement';
 
+const findReimbursementQuery = 
+`SELECT *
+FROM project_0.reimbursement
+WHERE reimbursementid = $1
+ORDER BY datesubmitted asc`;
+const patchReimbursementQuery = 
+`UPDATE project_0.reimbursement SET author = $2, amount = $3, dateSubmitted = $4, dateResolved = $5, description = $6, resolver = $7, status = $8, type = $9 
+WHERE reimbursementid = $1`;
 const postReimbursementQuery = 
 `INSERT INTO project_0.reimbursement (author, amount, dateSubmitted, dateResolved, description, resolver, status, "type")
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 const findReimbursementUserQuery = 
-`SELECT reimbursementid, auth.firstname || ' ' || auth.lastname AS auth_fullname, description, amount, datesubmitted, dateresolved, reso.firstname || ' ' || reso.lastname AS reso_fullname, project_0.reimbursement_status.status
+`SELECT *
 FROM project_0.reimbursement
-JOIN project_0.reimbursement_status ON statusid = project_0.reimbursement.status 
-JOIN project_0.users auth ON auth.userid = author
-JOIN project_0.users reso ON reso.userid = resolver
-WHERE auth.userid = $1
+WHERE author = $1
 ORDER BY datesubmitted asc`;
 const findReimbursementStatusQuery = 
-`SELECT reimbursementid, firstname || ' ' || lastname AS fullname, description, amount, datesubmitted, dateresolved, project_0.reimbursement_status.status
-FROM project_0.reimbursement 
-JOIN project_0.reimbursement_status ON statusid = project_0.reimbursement.status 
-JOIN project_0.users ON author = userid
-WHERE statusid = $1
+`SELECT *
+FROM project_0.reimbursement
+WHERE status = $1
 ORDER BY datesubmitted asc`;
 const genericFieldValidation = (field: string, table: string) : string => {
   return `SELECT * FROM project_0.${table} WHERE ${field} = $1`;
+}
+
+export async function patchReimbursement(reimbursement: Reimbursement): Promise<Reimbursement> {
+  let client : PoolClient;
+  client = await connectionPool.connect();
+  try {
+    let result : QueryResult;
+    result = await client.query(findReimbursementQuery, [reimbursement.reimbursementid]);
+    // console.log(result);
+    if (result.rows.length === 1) {
+      let updateArray : any[] = [];
+      let validationArray : string[] = ['author', 'resolver', 'status', 'type'];
+      // Append our patchUserQuery with all the rows that are passed in
+      for (let field in result.rows[0]) {
+        console.log(`Currently on field | ${field}`)
+        if (reimbursement[field] !== undefined) {
+          if (validationArray.includes(field)) {
+            let columnName: string = '';
+            let tableName: string = '';
+            let value: number = 0;
+            switch (field) {
+              case 'author':
+                columnName = 'userid';
+                tableName = 'users';
+                value = result.rows[0].author;
+                break;
+              case 'resolver':
+                columnName = 'userid';
+                tableName = 'users';
+                value = result.rows[0].resolver;
+                break;
+              case 'status':
+                columnName = 'statusid';
+                tableName = 'reimbursement_status';
+                value = result.rows[0].status;
+                break;
+              case 'type':
+                columnName = 'typeid';
+                tableName = 'reimbursement_type';
+                value = result.rows[0].type;
+                break;
+            }           
+            let genericResult : QueryResult = await client.query(genericFieldValidation(columnName, tableName), [value]);
+            if (genericResult.rows.length === 0) throw new Error(`Table: ${tableName} does not have a value: ${value} in column ${columnName}`);
+          }
+          updateArray.push(reimbursement[field]);
+        } else {
+          updateArray.push(result.rows[0][field]);
+        }
+      }
+      let patchedResult : QueryResult;
+      patchedResult = await client.query(patchReimbursementQuery, updateArray);
+      let [ reimbursementid, author, amount, dateSubmitted, dateResolved, description, resolver, status, type ] = updateArray;
+      // For some reason the spead operator isn't working here so I used destructuring
+      return new Reimbursement(reimbursementid, author, amount, dateSubmitted, dateResolved, description, resolver, status, type);
+    } 
+    throw new Error(`Couldn't find user.`);
+  } catch(e) {
+    throw new Error(`Failed to patch user: ${e.message}`)
+  } finally {
+    client && client.release();
+  }
 }
 
 export async function postReimbursement(reimbursement: Reimbursement): Promise<Reimbursement> {

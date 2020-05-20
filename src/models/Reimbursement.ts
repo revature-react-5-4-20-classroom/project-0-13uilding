@@ -1,6 +1,11 @@
 // The Reimbursement model is used to represent a single reimbursement that an employee would submit
-export class Reimbursement {
-  reimbursementId: number; // primary key
+interface IRawParams {
+  [key: string]: any
+}
+
+export class Reimbursement implements IRawParams {
+  [k: string]: any;
+  reimbursementid: number; // primary key
 	author: number;  // foreign key -> User; not null
 	amount: number;  // not null
   dateSubmitted: number; // not null
@@ -9,8 +14,8 @@ export class Reimbursement {
   resolver: number; // foreign key -> User
   status: number; // foreign ey -> ReimbursementStatus, not null
   type: number; // foreign key -> ReimbursementType
-  constructor(  reimbursementId: number, author: number, amount: number, dateSubmitted: number, dateResolved: number, description: string, resolver: number, status: number, type: number) {
-    this.reimbursementId = reimbursementId; 
+  constructor(  reimbursementid: number, author: number, amount: number, dateSubmitted: number, dateResolved: number, description: string, resolver: number, status: number, type: number) {
+    this.reimbursementid = reimbursementid; 
     this.author = author; 
     this.amount = amount; 
     this.dateSubmitted = dateSubmitted; 
