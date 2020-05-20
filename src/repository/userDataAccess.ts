@@ -62,6 +62,9 @@ export async function patchUser(user: User): Promise<User> {
         } else if (user.role.roleId != roleResults.rows[0].roleid) {
           throw new Error(`Role "${user.role.role}" exists, but it's roleid is ${roleResults.rows[0].roleid}\nProvide the proper role title and id.`)
         }
+      // If the role wasn't provided then we add the role from the database to our user so we don't break line 81
+      } else {
+        user.role = new Role(result.rows[0].roleid, result.rows[0].role);
       }
       let updateArray : any[] = [];
       // Append our patchUserQuery with all the rows that are passed in

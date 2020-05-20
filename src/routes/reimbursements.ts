@@ -1,6 +1,6 @@
 import express, { Router, Request, Response } from 'express';
 import { roleIs } from '../tools';
-import { getReimbursementsByStatus } from '../repository/reimbursementDataAcess';
+import { getReimbursementsByStatus, getReimbursementsByUser } from '../repository/reimbursementDataAcess';
 
 export const reimbursementsRouter : Router = express.Router();
 
@@ -54,11 +54,12 @@ reimbursementsRouter.get('/author/:userId', (req: Request, res: Response) => {
   //* Replace with middleware
   let userRole: string = 'finance-manager';
   let userId: number = +req.params.userId;
-  console.log(`userId, ${userId}, has type of: ${typeof userId}`);
   let roleIsFinanceManager: boolean = roleIs('finance-manager', userRole);
   if (roleIsFinanceManager) {
     // Get our users and return them in an array
-    res.json("Reimbursement user id").status(200);
+    getReimbursementsByUser(userId)
+      .then((reimbursements: Array<Object>) => res.json(reimbursements))
+      .catch((e: Error) => res.json(e.message))
   } else {
     res.send(`You do not have access to users because you are not a ${userRole}.`).status(401);
   }
