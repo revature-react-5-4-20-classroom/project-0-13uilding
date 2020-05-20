@@ -1,6 +1,7 @@
 import express, { Router, Request, Response } from 'express';
 import { roleIs } from '../tools';
-import { getReimbursementsByStatus, getReimbursementsByUser } from '../repository/reimbursementDataAcess';
+import { getReimbursementsByStatus, getReimbursementsByUser, postReimbursement } from '../repository/reimbursementDataAcess';
+import { Reimbursement } from '../models/Reimbursement';
 
 export const reimbursementsRouter : Router = express.Router();
 
@@ -8,7 +9,14 @@ export const reimbursementsRouter : Router = express.Router();
 // req Reimbursement
 // res Reimbursement
 reimbursementsRouter.post('', (req: Request, res: Response) => {
-  res.json("Reimbursement post").status(200);
+  let { author, amount, dateSubmitted, dateResolved, description, resolver, status, type } = req.body;
+  // Some basic validation
+  if (author <= 0 || amount <= 0 || resolver <= 0 || status <= 0 || type <= 0) {
+    res.send('Cannot have a number less than or equal to 0 as a field of the created reimbursement').status(400);
+  }
+  postReimbursement(new Reimbursement(0, author, amount, dateSubmitted, dateResolved, description, resolver, status, type))
+    .then((reimbursement: Reimbursement) => res.json(reimbursement).status(201))
+    .catch((e: Error) => res.json(e.message))
 })
 
 // patch
