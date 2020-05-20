@@ -77,7 +77,7 @@ export async function patchUser(user: User): Promise<User> {
   client = await connectionPool.connect();
   try {
     let result : QueryResult;
-    result = await client.query(findUserQuery, [user.userId]);
+    result = await client.query(findUserQuery, [user.userid]);
     // console.log(result);
     if (result.rows.length === 1) {
       // Confirm that the role we are trying to change to exists
