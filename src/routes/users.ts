@@ -1,5 +1,5 @@
 import express, { Router, Request, Response } from "express";
-import { roleIs } from "../Tools";
+import { roleIs } from "../tools";
 import { PoolClient, QueryResult } from "pg";
 import { getAllUsers, getUser, patchUser } from "../repository/userDataAccess";
 import { User } from "../models/User";
