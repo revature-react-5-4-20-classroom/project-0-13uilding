@@ -33,9 +33,7 @@ app.listen(PORT, () => {
   // Here we connect to our DB
   connectionPool.connect().then(
     (client: PoolClient) => {
-      console.log(`Connected to... 
-Database: ${process.env.PG_DATABASE} 
-Port: ${process.env.PG_PORT}`);
+      console.log(`Connected to Database: ${process.env.PG_DATABASE})
       client && client.release();
     }).catch((err: Error) => {
       console.error(err.message);
