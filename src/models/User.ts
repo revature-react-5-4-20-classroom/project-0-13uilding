@@ -1,10 +1,6 @@
 import { Role } from "./Role";
 
-interface IRawParams {
-  [key: string]: any
-}
-// The User model keeps track of users information.
-export class User implements IRawParams{
+export class User {
   [k: string]: any;
   userid: number; // primary key
 	username: string; // not null; unique
@@ -22,27 +18,4 @@ export class User implements IRawParams{
     this.email = email;
     this.role = role;
   }
-  //! Not sure if this is needed
-  // set userId(value: number): void {
-  //   this.userId = value;
-  // }
-  // set username(value: string): void {
-  //   this.username = value;
-  // }
-  // set password(value: string): void {
-  //   this.username = value;
-  // }
-  // set firstName(value: string): void {
-  //   this.username = value;
-  // }
-  // set lastName(value: string): void {
-  //   this.lastName = value;
-  // }
-  // set email(value: string): void {
-  //   this.email = value;
-  // }
-  // set role(value: Role): void {
-  //   this.role = value;
-  // }
-
 }

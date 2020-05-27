@@ -53,7 +53,7 @@ export async function getAllUsers(): Promise<User[]> {
   }
 }
 
-export async function getUser(userId: number): Promise<User> {
+export async function getUser(userId: number): Promise<User[]> {
   let client : PoolClient;
   client = await connectionPool.connect();
   try {
@@ -61,7 +61,7 @@ export async function getUser(userId: number): Promise<User> {
     result = await client.query(findUserQuery, [userId]);
     if (result.rows.length === 1) {
       let {userid, username, password, firstname, lastname, email, role} = result.rows[0];
-      return new User(userid, username, password, firstname, lastname, email, new Role(result.rows[0].roleid, role))
+      return [new User(userid, username, password, firstname, lastname, email, new Role(result.rows[0].roleid, role))]
     } else {
       throw new Error(`Couldn't find userId: ${userId} in the database.`)
     }
@@ -108,9 +108,9 @@ export async function patchUser(user: User): Promise<User> {
 
       let patchedResult : QueryResult;
       patchedResult = await client.query(patchUserQuery, updateArray);
-      let [userId, userName, password, firstName, lastName, email] = updateArray;
+      let [userId, userName, password, firstname, lastname, email] = updateArray;
       // For some reason the spead operator isn't working here so I used destructuring
-      return new User(userId, userName, password, firstName, lastName, email, role);
+      return new User(userId, userName, password, firstname, lastname, email, role);
     } 
     throw new Error(`Couldn't find user.`);
   } catch(e) {

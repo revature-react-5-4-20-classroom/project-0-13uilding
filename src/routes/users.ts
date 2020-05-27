@@ -18,8 +18,8 @@ usersRouter.patch("", (req: Request, res: Response) => {
         userid,
         username,
         password,
-        firstName,
-        lastName,
+        firstname,
+        lastname,
         email,
         role,
       } = req.body;
@@ -27,8 +27,8 @@ usersRouter.patch("", (req: Request, res: Response) => {
         userid,
         username,
         password,
-        firstName,
-        lastName,
+        firstname,
+        lastname,
         email,
         role
       );
@@ -85,7 +85,7 @@ usersRouter.get("/:id", (req: Request, res: Response) => {
     );
     if (roleIsFinanceManager) {
       getUser(queryId)
-        .then((user: User) => {
+        .then((user) => {
           res.json(user);
         })
         .catch((e: Error) => {

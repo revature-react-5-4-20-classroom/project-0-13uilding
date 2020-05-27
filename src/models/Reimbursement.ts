@@ -1,9 +1,6 @@
 // The Reimbursement model is used to represent a single reimbursement that an employee would submit
-interface IRawParams {
-  [key: string]: any
-}
 
-export class Reimbursement implements IRawParams {
+export class Reimbursement {
   [k: string]: any;
   reimbursementid: number; // primary key
 	author: number;  // foreign key -> User; not null
