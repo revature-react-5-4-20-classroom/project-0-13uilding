@@ -16,11 +16,13 @@ import { Application } from 'express';
 import { connectionPool } from './repository';
 import { PoolClient, QueryResult } from 'pg';
 import { sessionMiddleware } from './middleware/sessionMiddleware';
+import { corsFilter } from './middleware/corsFilter';
 
 
 const PORT: number = 3000;
 const app: Application = express();
 
+app.use(corsFilter);
 app.use(bodyparser.json());
 app.use(sessionMiddleware);
 
