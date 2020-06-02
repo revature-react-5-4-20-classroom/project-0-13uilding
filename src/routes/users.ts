@@ -7,24 +7,22 @@ import { authRoleFactory } from "../middleware/authMiddleware";
 
 export const usersRouter: Router = express.Router();
 
-usersRouter.use(authRoleFactory(["admin", "finance-manager"]));
 //* Implement middleware
 usersRouter.patch("", (req: Request, res: Response) => {
   let userRole: string = "admin";
-  let userId: number = +req.params.userid;
   if (req.session && req.session.user) {
     let roleIsAdmin: boolean = roleIs(req.session.user.role.role, userRole);
-    let userIsAuthor: boolean = +req.session.user.userid === userId;
+    let {
+      userid,
+      username,
+      password,
+      firstname,
+      lastname,
+      email,
+      role,
+    } = req.body;
+    let userIsAuthor: boolean = +req.session.user.userid === req.body.userid;
     if (roleIsAdmin || userIsAuthor) {
-      let {
-        userid,
-        username,
-        password,
-        firstname,
-        lastname,
-        email,
-        role,
-      } = req.body;
       let user: User = new User(
         userid,
         username,
@@ -39,10 +37,10 @@ usersRouter.patch("", (req: Request, res: Response) => {
           res.json(user);
         })
         .catch((e: Error) => res.json(e.message));
-    } else {
+      } else {
       res
         .json(
-          `You do not have access to users because you are not a ${userRole}.`
+          `You do not have access to users because you are not an ${userRole}.`
         )
         .status(401);
     }
@@ -50,6 +48,8 @@ usersRouter.patch("", (req: Request, res: Response) => {
     res.json(`Login again... Token expired`).status(400);
   }
 });
+
+usersRouter.use(authRoleFactory(["admin", "finance-manager"]));
 
 //* Implement middleware
 usersRouter.get("", (req: Request, res: Response) => {
