@@ -95,7 +95,8 @@ export async function patchUser(user: User): Promise<User> {
       let updateArray : any[] = [];
       // Append our patchUserQuery with all the rows that are passed in
       for (let field in result.rows[0]) {
-        if (user[field] !== undefined) {
+        //*TODO This is the line I believe will get rid of empty fields
+        if (user[field] !== undefined && user[field] !== "") {
           updateArray.push(user[field]);
         } else {
           updateArray.push(result.rows[0][field]);

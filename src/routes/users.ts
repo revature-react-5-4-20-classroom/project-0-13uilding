@@ -11,9 +11,11 @@ usersRouter.use(authRoleFactory(["admin", "finance-manager"]));
 //* Implement middleware
 usersRouter.patch("", (req: Request, res: Response) => {
   let userRole: string = "admin";
-  if (req.session) {
+  let userId: number = +req.params.userid;
+  if (req.session && req.session.user) {
     let roleIsAdmin: boolean = roleIs(req.session.user.role.role, userRole);
-    if (roleIsAdmin) {
+    let userIsAuthor: boolean = +req.session.user.userid === userId;
+    if (roleIsAdmin || userIsAuthor) {
       let {
         userid,
         username,
