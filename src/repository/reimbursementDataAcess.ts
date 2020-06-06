@@ -14,7 +14,7 @@ const patchReimbursementQuery =
 `UPDATE project_0.reimbursement SET author = $2, amount = $3, datesubmitted = $4, dateresolved = $5, description = $6, resolver = $7, status = $8, type = $9 
 WHERE reimbursementid = $1`;
 const postReimbursementQuery = 
-`INSERT INTO project_0.reimbursement (author, amount, dateSubmitted, dateResolved, description, resolver, status, "type")
+`INSERT INTO project_0.reimbursement (author, amount, datesubmitted, dateresolved, description, resolver, status, "type")
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 const findReimbursementUserQuery = 
 `SELECT *
@@ -80,9 +80,9 @@ export async function patchReimbursement(reimbursement: Reimbursement): Promise<
       }
       let patchedResult : QueryResult;
       patchedResult = await client.query(patchReimbursementQuery, updateArray);
-      let [ reimbursementid, author, amount, dateSubmitted, dateResolved, description, resolver, status, type ] = updateArray;
+      let [ reimbursementid, author, amount, datesubmitted, dateresolved, description, resolver, status, type ] = updateArray;
       // For some reason the spead operator isn't working here so I used destructuring
-      return new Reimbursement(reimbursementid, author, amount, dateSubmitted, dateResolved, description, resolver, status, type);
+      return new Reimbursement(reimbursementid, author, amount, datesubmitted, dateresolved, description, resolver, status, type);
     } 
     throw new Error(`Couldn't find reimbursement.`);
   } catch(e) {
@@ -97,20 +97,21 @@ export async function postReimbursement(reimbursement: Reimbursement): Promise<R
   client = await connectionPool.connect();
   try {
     let result : QueryResult;
-    let { author, amount, dateSubmitted, dateResolved, description, resolver, status, type } = reimbursement;
+    let { author, amount, datesubmitted, dateresolved, description, resolver, status, type } = reimbursement;
 
     // Need to determine if the author, resolver, status, and type correspond to actual values in the DB before creating new reimbursement
     let authorResult : QueryResult = await client.query(genericFieldValidation("userid", "users"), [author]);
     if (authorResult.rows.length === 0) throw new Error(`Author with the userid ${author} doesn't exist in the database. Use a valid userid.`);
-    let resolverResult : QueryResult = await client.query(genericFieldValidation("userid", "users"), [resolver]);
-    if (resolverResult.rows.length === 0) throw new Error(`Resolver with the userid ${resolver} doesn't exist in the database. Use a valid userid.`);
+    //! CHANGED ON 6/6/20
+    // let resolverResult : QueryResult = await client.query(genericFieldValidation("userid", "users"), [resolver]);
+    // if (resolverResult.rows.length === 0) throw new Error(`Resolver with the userid ${resolver} doesn't exist in the database. Use a valid userid.`);
     let statusResult : QueryResult = await client.query(genericFieldValidation("statusid", "reimbursement_status"), [status]);
     if (statusResult.rows.length === 0) throw new Error(`Status with the statusid ${status} doesn't exist in the database. Use a valid statusid.`);
     let typeResult : QueryResult = await client.query(genericFieldValidation("typeid", "reimbursement_type"), [type]);
     if (typeResult.rows.length === 0) throw new Error(`Type with the typeid ${type} doesn't exist in the database. Use a valid typeid.`);
 
 
-    result = await client.query(postReimbursementQuery, [author, amount, dateSubmitted, dateResolved, description, resolver, status, type]);
+    result = await client.query(postReimbursementQuery, [author, amount, datesubmitted, dateresolved, description, resolver, status, type]);
     if (result.rowCount === 1) {
       return reimbursement;
     } else {

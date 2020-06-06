@@ -10,12 +10,12 @@ export const reimbursementsRouter : Router = express.Router();
 // req Reimbursement
 // res Reimbursement
 reimbursementsRouter.post('', (req: Request, res: Response) => {
-  let { author, amount, dateSubmitted, dateResolved, description, resolver, status, type } = req.body;
+  let { author, amount, datesubmitted, dateresolved, description, resolver, status, type } = req.body;
   // Some basic validation
-  if (author <= 0 || amount <= 0 || resolver <= 0 || status <= 0 || type <= 0) {
+  if (author <= 0 || amount <= 0 || status <= 0 || type <= 0) {
     res.send('Cannot have a number less than or equal to 0 as a field of the created reimbursement').status(400);
   }
-  postReimbursement(new Reimbursement(0, author, amount, dateSubmitted, dateResolved, description, resolver, status, type))
+  postReimbursement(new Reimbursement(0, author, amount, datesubmitted, dateresolved, description, resolver, status, type))
     .then((reimbursement: Reimbursement) => res.json(reimbursement).status(201))
     .catch((e: Error) => res.json(e.message))
 })
@@ -56,12 +56,12 @@ reimbursementsRouter.patch('', (req: Request, res: Response) => {
   let roleIsFinanceManager: boolean = roleIs('finance-manager', userRole);
   if (roleIsFinanceManager) {
     // Get our users and return them in an array
-    let { reimbursementid, author, amount, dateSubmitted, dateResolved, description, resolver, status, type } = req.body;
+    let { reimbursementid, author, amount, datesubmitted, dateresolved, description, resolver, status, type } = req.body;
     // Some basic validation
     if (author <= 0 || amount <= 0 || resolver <= 0 || status <= 0 || type <= 0) {
       res.send('Cannot have a number less than or equal to 0 as a field of the created reimbursement').status(400);
     }
-    patchReimbursement(new Reimbursement( reimbursementid, author, amount, dateSubmitted, dateResolved, description, resolver, status, type ))
+    patchReimbursement(new Reimbursement( reimbursementid, author, amount, datesubmitted, dateresolved, description, resolver, status, type ))
       .then((reimbursement: Reimbursement) => res.json(reimbursement).status(200))
       .catch((e: Error) => res.json(e.message))
   } else {
