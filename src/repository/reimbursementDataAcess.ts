@@ -36,13 +36,11 @@ export async function patchReimbursement(reimbursement: Reimbursement): Promise<
   try {
     let result : QueryResult;
     result = await client.query(findReimbursementQuery, [reimbursement.reimbursementid]);
-    // console.log(result);
     if (result.rows.length === 1) {
       let updateArray : any[] = [];
       let validationArray : string[] = ['author', 'resolver', 'status', 'type'];
       // Append our patchUserQuery with all the rows that are passed in
       for (let field in result.rows[0]) {
-        // console.log(`Currently on field | ${field}`)
         if (reimbursement[field] !== undefined) {
           if (validationArray.includes(field)) {
             let columnName: string = '';
@@ -69,9 +67,13 @@ export async function patchReimbursement(reimbursement: Reimbursement): Promise<
                 tableName = 'reimbursement_type';
                 value = result.rows[0].type;
                 break;
-            }           
-            let genericResult : QueryResult = await client.query(genericFieldValidation(columnName, tableName), [value]);
-            if (genericResult.rows.length === 0) throw new Error(`Table: ${tableName} does not have a value: ${value} in column ${columnName}`);
+            }
+            if (field === 'resolver' && value === null) {
+              console.log('Resolver field from our database was null... skipping validation')
+            } else {
+              let genericResult : QueryResult = await client.query(genericFieldValidation(columnName, tableName), [value]);
+              if (genericResult.rows.length === 0) throw new Error(`Table: ${tableName} does not have a value: ${value} in column ${columnName}`);
+            }     
           }
           updateArray.push(reimbursement[field]);
         } else {
