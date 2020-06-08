@@ -85,7 +85,7 @@ usersRouter.get("", (req: Request, res: Response) => {
     } else {
       res
         .json(
-          `You do not have access to users because you are not a ${userRole}.`
+          `You do not have access to users because you are not a ${userRole1} or a ${userRole2}.`
         )
         .status(401);
     }
