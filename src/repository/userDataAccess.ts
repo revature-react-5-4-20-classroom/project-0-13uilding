@@ -11,6 +11,7 @@ const findRoleQuery = `SELECT * FROM project_0.roles WHERE role = $1`;
 const findRoleByIdQuery = `SELECT * FROM project_0.roles WHERE roleid = $1`;
 const patchUserQuery = `UPDATE project_0.users SET username = $2, password = $3, firstname = $4, lastname = $5, email = $6, role = $7 WHERE userid = $1`;
 const findUserByUsernameQuery = `SELECT * FROM project_0.users WHERE username = $1 AND password = $2`;
+const findFinanceManagersQuery = `SELECT firstname, lastname, userid FROM project_0.users WHERE role = 5`;
 
 
 export async function getUserByUsername(username: string, password: string): Promise<User> {
@@ -30,6 +31,26 @@ export async function getUserByUsername(username: string, password: string): Pro
     } else {
       throw new Error(`Username and Password are not matched to a valid user`)
     }
+  } catch (e) {
+    throw new Error(`Failed to validate User with DB: ${e.message}`)
+  } finally {
+    client && client.release();
+  }
+}
+
+export async function getFinanceManagers(): Promise<Object[]> {
+  let client : PoolClient;
+  client = await connectionPool.connect();
+  try {
+    let result : QueryResult;
+    result = await client.query(findFinanceManagersQuery);
+    return result.rows.map((user) => {
+      return {
+        userid: user.userid,
+        firstname: user.firstname,
+        lastname: user.lastname
+      }
+    })
   } catch (e) {
     throw new Error(`Failed to validate User with DB: ${e.message}`)
   } finally {

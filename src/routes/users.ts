@@ -1,12 +1,25 @@
 import express, { Router, Request, Response } from "express";
 import { roleIs } from "../tools";
 import { PoolClient, QueryResult } from "pg";
-import { getAllUsers, getUser, patchUser } from "../repository/userDataAccess";
+import { getAllUsers, getUser, patchUser, getFinanceManagers } from "../repository/userDataAccess";
 import { User } from "../models/User";
 import { authRoleFactory } from "../middleware/authMiddleware";
 
 export const usersRouter: Router = express.Router();
 
+usersRouter.get("/finance-managers", (req: Request, res: Response) => {
+  if (req.session && req.session.user) {
+    getFinanceManagers()
+      .then((user) => {
+        res.json(user);
+      })
+      .catch((e: Error) => {
+        res.json(e.message);
+      });
+  } else {
+    res.json(`Login again... Token expired`).status(400);
+  }
+})
 //* Implement middleware
 usersRouter.patch("", (req: Request, res: Response) => {
   let userRole: string = "admin";
