@@ -67,7 +67,7 @@ usersRouter.use(authRoleFactory(["admin", "finance-manager"]));
 //* Implement middleware
 usersRouter.get("", (req: Request, res: Response) => {
   let userRole1: string = "finance-manager";
-  let userRole2: string = "finance-manager";
+  let userRole2: string = "admin";
   if (req.session) {
     let roleIsFinanceManager: boolean = roleIs(
       req.session.user.role.role,
